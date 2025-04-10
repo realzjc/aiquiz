@@ -1,15 +1,9 @@
-from .base import Base, get_db
-from .models import (
-    User, UserProfile, OAuthAccount,
-    QuestionBank, Question, QuestionOption, QuestionStat, QuestionBankShare,
-    Quiz, QuizQuestion, QuizSubmission, DifficultyEnum,
-    Document
-)
+# 应用包初始化文件
+# 这个文件使app目录成为一个Python包
 
-__all__ = [
-    "Base", "get_db",
-    "User", "UserProfile", "OAuthAccount",
-    "QuestionBank", "Question", "QuestionOption", "QuestionStat", "QuestionBankShare",
-    "Quiz", "QuizQuestion", "QuizSubmission", "DifficultyEnum",
-    "Document"
-]
+__version__ = "0.1.0"
+
+# 不要在这里导入模块，避免循环导入问题
+# 如果需要导入，可以在函数内部导入
+
+# 可以在这里添加应用级别的初始化代码
