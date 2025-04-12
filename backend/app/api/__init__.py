@@ -5,4 +5,12 @@
 # 例如：API版本控制、全局中间件等
 
 # 导入endpoints子包，使其可以通过app.api.endpoints访问
-from . import endpoints
+from fastapi import APIRouter
+from app.api.endpoints import auth, users, files, quizzes
+
+api_router = APIRouter()
+
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(files.router, prefix="/files", tags=["files"])
+api_router.include_router(quizzes.router, prefix="/quizzes", tags=["quizzes"])

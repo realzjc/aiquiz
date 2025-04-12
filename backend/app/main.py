@@ -5,9 +5,9 @@ from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.api.endpoints import auth, users, files, quizzes
 from app.db.base import engine
 from app.db import models
+from app.api import api_router
 
 # 创建数据库表
 for model in models:  # 直接使用models列表，不要访问__all__属性
@@ -26,17 +26,14 @@ app = FastAPI(
 # 设置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境中应该限制源
+    allow_origins=["http://localhost:5173"],  # 前端地址
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 包含路由
-app.include_router(auth.router, prefix=settings.API_V1_STR, tags=["auth"])
-app.include_router(users.router, prefix=settings.API_V1_STR, tags=["users"])
-app.include_router(files.router, prefix=settings.API_V1_STR, tags=["files"])
-app.include_router(quizzes.router, prefix=settings.API_V1_STR, tags=["quizzes"])
+# 挂载路由
+app.include_router(api_router, prefix=settings.API_V1_STR)  # 👈 挂载版本前缀
 
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIRECTORY), name="uploads")
 

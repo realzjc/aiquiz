@@ -23,11 +23,12 @@ services:
     ports:
       - "5432:5432"
     environment:
+      POSTGRES_DB: aiquiz
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: aiquiz
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: always
 
 volumes:
   pgdata:
