@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # 数据库配置
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://zjc:123456@db:5432/aiquiz")
     
     # JWT配置
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")

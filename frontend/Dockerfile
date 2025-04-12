@@ -1,10 +1,11 @@
 FROM node:18
 
 WORKDIR /app
-COPY package.json vite.config.js ./
+
+COPY .env .      
+COPY package.json package-lock.json ./
 RUN npm install
 
-COPY ./src ./src
-COPY ./public ./public
+COPY . .
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host"]

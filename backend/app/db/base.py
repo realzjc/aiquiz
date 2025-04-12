@@ -6,7 +6,7 @@ from app.config import settings
 
 # 创建数据库引擎
 engine = create_engine(
-    settings.DATABASE_URL, connect_args={"check_same_thread": False}
+    settings.DATABASE_URL, echo=True
 )
 # 如果使用PostgreSQL，移除connect_args参数
 
