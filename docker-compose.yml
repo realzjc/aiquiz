@@ -14,14 +14,14 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules  # 防止 node_modules 被覆盖
+      - /app/node_modules # 防止 node_modules 被覆盖
     env_file:
       - ./frontend/.env
     depends_on:
       - backend
     environment:
-      - CHOKIDAR_USEPOLLING=true  # 热更新相关，可选
-
+      - CHOKIDAR_USEPOLLING=true # 热更新相关，可选
+      # - NODE_ENV=development
   db:
     image: postgres:15
     ports:
