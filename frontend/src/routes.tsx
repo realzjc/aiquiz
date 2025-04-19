@@ -9,6 +9,7 @@ import Dashboard from '@/pages/Dashboard';
 import QuickCreate from '@/pages/QuickCreate';
 import Bank from '@/pages/bank/[bankId]';
 import Layout from '@/layouts/Layout';
+import Chat from '@/pages/Chat';
 // export default function AppRoutes() {
 //     return (
 //         <BrowserRouter>
@@ -41,6 +42,7 @@ export default function AppRoutes() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/quick-create" element={<QuickCreate />} />
                     <Route path="/bank/:bankId" element={<Bank />} /> {/* 动态 bank 页面 */}
+                    <Route path="/chat" element={<Chat />} /> {/* 动态 bank 页面 */}
                 </Route>
             </Routes>
         </BrowserRouter>

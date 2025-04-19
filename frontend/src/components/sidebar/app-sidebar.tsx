@@ -24,7 +24,7 @@ import { NavUser } from "@/components/sidebar/nav-user"
 import { NavSecondary } from "@/components/sidebar/nav-secondary"
 import { NavBanks } from "@/components/sidebar/nav-banks"
 import { NavMain } from "@/components/sidebar/nav-main"
-
+import { useBanks } from "@/contexts/BanksContext"
 import { banks } from "@/data/mock-banks" // ✅ 从 mock 数据中读取
 
 const data = {
@@ -173,6 +173,7 @@ const data = {
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { banks } = useBanks()
     return (
         <Sidebar collapsible="offcanvas" {...props}>
 
