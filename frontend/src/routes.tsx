@@ -4,8 +4,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register'; // 👈 加这一行
 import ProtectedRoute from '@/components/common/ProtectedRoute'; // 新增导入
-import Home from '@/pages/Home';;
-
+import Home from '@/pages/Home';
+import Dashboard from '@/pages/Dashboard';
+import QuickCreate from '@/pages/QuickCreate';
+import Bank from '@/pages/bank/[bankId]';
+import Layout from '@/layouts/Layout';
 // export default function AppRoutes() {
 //     return (
 //         <BrowserRouter>
@@ -33,7 +36,12 @@ export default function AppRoutes() {
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/home" element={<Home />} />
+                <Route element={<Layout />}>
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/quick-create" element={<QuickCreate />} />
+                    <Route path="/bank/:bankId" element={<Bank />} /> {/* 动态 bank 页面 */}
+                </Route>
             </Routes>
         </BrowserRouter>
     );

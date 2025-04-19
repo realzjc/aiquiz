@@ -7,8 +7,12 @@ import { defineConfig } from "vite"
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      {
+        find: /^@\/(.*)/,          // 正确处理 "@/xxx" 而不影响 "@radix-ui"
+        replacement: path.resolve(__dirname, "src") + "/$1",
+      },
+      // "@": path.resolve(__dirname, "./src"),
+    ],
   },
 })

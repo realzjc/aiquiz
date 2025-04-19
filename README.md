@@ -19,3 +19,12 @@ npm run dev
 ```
 
 http://localhost:5173/
+
+## docker 
+remove old dependencies and volume(database) and build new one
+``` bash
+docker compose down -v
+docker compose build --no-cache
+docker compose up
+```
+docker system prune -a --volumes 删除不需要的

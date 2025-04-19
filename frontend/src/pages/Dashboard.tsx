@@ -4,8 +4,8 @@ import { SiteHeader } from "@/components/common/site-header"
 import data from "@/data/data.json"
 import { DataTable } from "@/components/common/data-table"
 import { ChartAreaInteractive } from "@/components/common/chart-area-interactive"
-// export default function Home({ children }: { children: React.ReactNode }) {
-export default function Home({ children }: { children?: React.ReactNode }) {
+
+export default function Dashboard({ children }: { children?: React.ReactNode }) {
     return (
         // <SidebarProvider >
         //     <AppSidebar />
@@ -18,13 +18,12 @@ export default function Home({ children }: { children?: React.ReactNode }) {
         //                     <div className="px-4 lg:px-6">
         //                         <ChartAreaInteractive />
         //                     </div>
-        //                     <DataTable data={data} />
+
         //                 </div>
         //             </div>
         //         </div>
         //     </SidebarInset>
         // </SidebarProvider>
-
         <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -32,7 +31,7 @@ export default function Home({ children }: { children?: React.ReactNode }) {
                     <div className="px-4 lg:px-6">
                         <ChartAreaInteractive />
                     </div>
-                    <DataTable data={data} />
+
                 </div>
             </div>
         </div>
