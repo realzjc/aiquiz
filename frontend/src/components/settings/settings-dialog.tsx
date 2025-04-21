@@ -13,47 +13,42 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import React from "react";
-// 设置选项类型
+
+// Settings dialog props
 type SettingsProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
 export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
-    // 用户设置状态
     const [username, setUsername] = useState("shadcn");
     const [email, setEmail] = useState("m@example.com");
-
-    // 界面设置状态
     const [theme, setTheme] = useState("light");
-    const [language, setLanguage] = useState("中文");
-
-    // 通知设置状态
+    const [language, setLanguage] = useState("Chinese");
     const [emailNotifications, setEmailNotifications] = useState(true);
 
     const handleSave = () => {
-        // 保存设置逻辑
-        console.log("保存设置", { username, email, theme, language, emailNotifications });
+        console.log("Saved settings", { username, email, theme, language, emailNotifications });
         onOpenChange(false);
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] bg-white text-black shadow-lg border border-gray-400">
                 <DialogHeader>
-                    <DialogTitle>设置</DialogTitle>
+                    <DialogTitle>Settings</DialogTitle>
                     <DialogDescription>
-                        调整您的账户和应用程序设置
+                        Adjust your account and application preferences
                     </DialogDescription>
                 </DialogHeader>
 
                 <Tabs defaultValue="account" className="w-full">
                     <div className="flex">
                         <TabsList className="flex-col h-auto mr-4 w-[150px]">
-                            <TabsTrigger value="account" className="justify-start w-full">账户</TabsTrigger>
-                            <TabsTrigger value="appearance" className="justify-start w-full">界面</TabsTrigger>
-                            <TabsTrigger value="notifications" className="justify-start w-full">通知</TabsTrigger>
-                            <TabsTrigger value="security" className="justify-start w-full">安全</TabsTrigger>
+                            <TabsTrigger value="account" className="justify-start w-full">Account</TabsTrigger>
+                            <TabsTrigger value="appearance" className="justify-start w-full">Appearance</TabsTrigger>
+                            <TabsTrigger value="notifications" className="justify-start w-full">Notifications</TabsTrigger>
+                            <TabsTrigger value="security" className="justify-start w-full">Security</TabsTrigger>
                         </TabsList>
 
                         <div className="flex-1">
@@ -61,7 +56,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="username" className="text-right">
-                                            用户名
+                                            Username
                                         </Label>
                                         <Input
                                             id="username"
@@ -72,7 +67,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="email" className="text-right">
-                                            邮箱
+                                            Email
                                         </Label>
                                         <Input
                                             id="email"
@@ -88,7 +83,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="theme" className="text-right">
-                                            主题
+                                            Theme
                                         </Label>
                                         <select
                                             id="theme"
@@ -96,14 +91,14 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                             onChange={(e) => setTheme(e.target.value)}
                                             className="col-span-3 p-2 border rounded-md"
                                         >
-                                            <option value="light">浅色</option>
-                                            <option value="dark">深色</option>
-                                            <option value="system">跟随系统</option>
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="system">System</option>
                                         </select>
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="language" className="text-right">
-                                            语言
+                                            Language
                                         </Label>
                                         <select
                                             id="language"
@@ -111,7 +106,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                             onChange={(e) => setLanguage(e.target.value)}
                                             className="col-span-3 p-2 border rounded-md"
                                         >
-                                            <option value="中文">中文</option>
+                                            <option value="Chinese">Chinese</option>
                                             <option value="English">English</option>
                                         </select>
                                     </div>
@@ -122,7 +117,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="email-notifications" className="text-right">
-                                            邮件通知
+                                            Email Notifications
                                         </Label>
                                         <div className="col-span-3 flex items-center">
                                             <input
@@ -132,7 +127,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                                 onChange={(e) => setEmailNotifications(e.target.checked)}
                                                 className="mr-2"
                                             />
-                                            <span>接收邮件通知</span>
+                                            <span>Receive email updates</span>
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +137,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="current-password" className="text-right">
-                                            当前密码
+                                            Current Password
                                         </Label>
                                         <Input
                                             id="current-password"
@@ -152,7 +147,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="new-password" className="text-right">
-                                            新密码
+                                            New Password
                                         </Label>
                                         <Input
                                             id="new-password"
@@ -167,7 +162,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                 </Tabs>
 
                 <DialogFooter>
-                    <Button onClick={handleSave}>保存更改</Button>
+                    <Button onClick={handleSave}>Save Changes</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

@@ -15,6 +15,7 @@ import {
     SidebarGroupAction,
     SidebarMenuAction,
     SidebarTrigger,
+    useSidebar
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
@@ -26,6 +27,7 @@ import { NavBanks } from "@/components/sidebar/nav-banks"
 import { NavMain } from "@/components/sidebar/nav-main"
 import { useBanks } from "@/contexts/BanksContext"
 import { banks } from "@/data/mock-banks" // ✅ 从 mock 数据中读取
+import { SearchDialog } from "@/components/sidebar/SearchDialog"
 
 const data = {
     user: {
@@ -170,10 +172,16 @@ const data = {
 //             icon: Home,
 //     },
 // }
+import { useAuth } from "@/contexts/AuthContext"
+import { useState } from "react"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { banks } = useBanks()
+    const { isMobile } = useSidebar()
+    const [settingsOpen, setSettingsOpen] = useState(false)
+
+    const [searchOpen, setSearchOpen] = useState(false)
     return (
         <Sidebar collapsible="offcanvas" {...props}>
 
@@ -194,8 +202,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                {/* <NavBanks items={data.banks} /> */}
+                <NavMain
+                    items={data.navMain}
+                    onSearchOpen={() => setSearchOpen(true)}
+                />
                 <NavBanks items={banks.map(bank => ({
                     name: bank.name,
                     url: `/bank/${bank.id}`,
@@ -204,8 +214,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                {/* <NavUser user={data.user} /> */}
+                <NavUser />
             </SidebarFooter>
+
+            {/* 把 SearchDialog 放到 Sidebar 下，这样它的 overlay 会盖住整个页面 */}
+            <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
         </Sidebar>
     )
 }

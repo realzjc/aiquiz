@@ -26,5 +26,9 @@ remove old dependencies and volume(database) and build new one
 docker compose down -v
 docker compose build --no-cache
 docker compose up
+
+docker compose up --build --remove-orphans
 ```
 docker system prune -a --volumes 删除不需要的
+
+className="bg-white text-black shadow-lg border border-gray-200"

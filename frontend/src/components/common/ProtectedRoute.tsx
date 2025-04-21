@@ -1,15 +1,24 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import React from 'react';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
+interface ProtectedRouteProps {
+    children: React.ReactNode;
+}
 
-    if (loading) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+    const { isAuthenticated, isLoading } = useAuth();
+    const location = useLocation();
+
+    // 如果正在加载，显示加载状态
+    if (isLoading) {
         return <div>Loading...</div>;
     }
 
-    return isAuthenticated ? children : <Navigate to="/login" />;
-};
+    // 如果未认证，重定向到登录页面
+    if (!isAuthenticated) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
-export default ProtectedRoute;
+    // 已认证，显示子组件
+    return <>{children}</>;
+}
