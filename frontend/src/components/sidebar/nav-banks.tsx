@@ -47,19 +47,21 @@ const handleDelete = (name: string) => {
 
 export function NavBanks({
     items,
+    onAddBank,
 }: {
     items: {
         name: string
         url: string
         icon: LucideIcon
     }[]
+    onAddBank: () => void
 }) {
     const { isMobile } = useSidebar()
 
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>Quiz Banks</SidebarGroupLabel>
-            <SidebarGroupAction title="Add Project">
+            <SidebarGroupAction title="Add Bank" onClick={onAddBank}>
                 <Plus /> <span className="sr-only">Add Project</span>
             </SidebarGroupAction>
             <SidebarMenu>

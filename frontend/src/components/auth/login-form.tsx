@@ -43,7 +43,8 @@ export function LoginForm({
                 email: response.data.email,
                 // 其他用户数据...
             })
-
+            console.log("login success")
+            console.log(response.data)
             toast.success("Login successful")
             navigate("/dashboard")
         } catch (err: any) {

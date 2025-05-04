@@ -28,6 +28,10 @@ import { NavMain } from "@/components/sidebar/nav-main"
 import { useBanks } from "@/contexts/BanksContext"
 import { banks } from "@/data/mock-banks" // ✅ 从 mock 数据中读取
 import { SearchDialog } from "@/components/sidebar/SearchDialog"
+import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
+import api from "@/lib/api"
 
 const data = {
     user: {
@@ -172,16 +176,43 @@ const data = {
 //             icon: Home,
 //     },
 // }
-import { useAuth } from "@/contexts/AuthContext"
-import { useState } from "react"
+
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { banks } = useBanks()
+    const { banks, addBank } = useBanks()
     const { isMobile } = useSidebar()
     const [settingsOpen, setSettingsOpen] = useState(false)
-
     const [searchOpen, setSearchOpen] = useState(false)
+
+    const navigate = useNavigate()
+
+    const handleAddBank = async () => {
+        try {
+            // 1. 发请求 —— 这里 user_id 看你后端是否必填，
+            //    可以从 AuthContext 里拿当前用户 id
+            const res = await api.post("/quizzes/banks", {
+                name: "Untitled Bank",
+                description: "Untitled Bank"
+            })
+            // newBank 里通常会有 { id, name, description, ... }
+            const newBank = res.data
+            // 2. 更新全局状态（只挑用得到的字段）
+            addBank({
+                id: newBank.id,
+                name: newBank.name,
+                url: `/bank/${newBank.id}`, // 👈 补上 url
+                icon: FileText,             // 👈 补上 icon
+            })
+
+            // 3. 跳到新页面
+            navigate(`/bank/${newBank.id}`)
+        } catch (err) {
+            console.error("新增 Bank 失败:", err)
+        }
+    }
+
+
     return (
         <Sidebar collapsible="offcanvas" {...props}>
 
@@ -210,7 +241,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     name: bank.name,
                     url: `/bank/${bank.id}`,
                     icon: FileText,
-                }))} />
+                }))}
+                    onAddBank={handleAddBank}
+                />
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>

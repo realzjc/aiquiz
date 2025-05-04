@@ -19,7 +19,7 @@ class QuestionBankBase(BaseModel):
 
 class QuestionBankCreate(QuestionBankBase):
     """创建题库请求模型"""
-    user_id: int
+    pass
 
 
 class QuestionBankUpdate(BaseModel):
@@ -186,9 +186,8 @@ class QuizBase(BaseModel):
 
 class QuizCreate(QuizBase):
     """创建测验请求模型"""
-    user_id: int
     bank_id: int
-
+    # 移除 user_id 字段，因为它会从当前登录用户获取
 
 class QuizUpdate(BaseModel):
     """更新测验请求模型"""

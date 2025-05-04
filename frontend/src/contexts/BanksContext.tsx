@@ -22,6 +22,7 @@ const BanksContext = createContext<BanksContextValue>({
 export const BanksProvider = ({ children }: { children: ReactNode }) => {
     const [banks, setBanks] = useState<Bank[]>([])
     const addBank = (bank: Bank) => setBanks((prev) => [...prev, bank])
+    
     return (
         <BanksContext.Provider value={{ banks, addBank }}>
             {children}

@@ -2,3 +2,4 @@
 from .user import *
 from .quiz import *
 from .file import *
+from .auth import *

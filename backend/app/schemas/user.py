@@ -76,15 +76,3 @@ class UserProfileInDB(UserProfileBase):
     
     class Config:
         orm_mode = True
-
-
-class Token(BaseModel):
-    """令牌响应模型"""
-    access_token: str
-    token_type: str
-
-
-class TokenPayload(BaseModel):
-    """令牌载荷模型"""
-    sub: Optional[int] = None
-    exp: Optional[datetime] = None

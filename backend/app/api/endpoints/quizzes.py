@@ -1,22 +1,17 @@
+# app/api/endpoints/quizzes.py
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import json
-from datetime import datetime
 
 from app.core.security import get_current_active_user
 from app.db.base import get_db
 from app.db.models.user import User
-from app.db.models.quiz import (
-    QuestionBank, Question, QuestionOption, QuestionStat, 
-    Quiz, QuizQuestion, QuizSubmission, DifficultyEnum
-)
+from app.services.quiz_service import QuizService
 from app.schemas.quiz import (
     QuestionBank as QuestionBankSchema,
     QuestionBankCreate, QuestionBankUpdate,
     Question as QuestionSchema,
     QuestionCreate, QuestionUpdate,
-    QuestionOptionCreate,
     Quiz as QuizSchema,
     QuizCreate, QuizUpdate,
     QuizSubmissionCreate
@@ -42,17 +37,7 @@ def create_question_bank(
     
     返回创建的题库信息
     """
-    # 创建题库
-    db_bank = QuestionBank(
-        name=bank_in.name,
-        description=bank_in.description,
-        user_id=current_user.id
-    )
-    db.add(db_bank)
-    db.commit()
-    db.refresh(db_bank)
-    
-    return db_bank
+    return QuizService.create_question_bank(db, bank_in, current_user)
 
 
 @router.get("/banks", response_model=List[QuestionBankSchema])
@@ -72,11 +57,7 @@ def list_question_banks(
     
     返回题库列表
     """
-    banks = db.query(QuestionBank).filter(
-        QuestionBank.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
-    
-    return banks
+    return QuizService.list_question_banks(db, current_user, skip, limit)
 
 
 @router.get("/banks/{bank_id}", response_model=QuestionBankSchema)
@@ -94,18 +75,7 @@ def get_question_bank(
     
     返回题库详情，包括题库中的问题
     """
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    return bank
+    return QuizService.get_question_bank(db, bank_id, current_user)
 
 
 @router.put("/banks/{bank_id}", response_model=QuestionBankSchema)
@@ -126,29 +96,7 @@ def update_question_bank(
     
     返回更新后的题库信息
     """
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    # 更新题库信息
-    if bank_in.name is not None:
-        bank.name = bank_in.name
-    
-    if bank_in.description is not None:
-        bank.description = bank_in.description
-    
-    db.add(bank)
-    db.commit()
-    db.refresh(bank)
-    
-    return bank
+    return QuizService.update_question_bank(db, bank_id, bank_in, current_user)
 
 
 @router.delete("/banks/{bank_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -166,21 +114,7 @@ def delete_question_bank(
     
     无返回内容
     """
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    # 删除题库
-    db.delete(bank)
-    db.commit()
-    
+    QuizService.delete_question_bank(db, bank_id, current_user)
     return None
 
 
@@ -207,48 +141,7 @@ def create_question(
     
     返回创建的问题信息
     """
-    # 检查题库是否存在且属于当前用户
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    # 创建问题
-    db_question = Question(
-        bank_id=bank_id,
-        prompt=question_in.prompt,
-        answer=question_in.answer,
-        explanation=question_in.explanation,
-        difficulty=question_in.difficulty
-    )
-    db.add(db_question)
-    db.commit()
-    db.refresh(db_question)
-    
-    # 创建问题统计
-    db_stat = QuestionStat(question_id=db_question.id)
-    db.add(db_stat)
-    db.commit()
-    
-    # 如果有选项，创建选项
-    if question_in.options:
-        for option_in in question_in.options:
-            db_option = QuestionOption(
-                question_id=db_question.id,
-                content=option_in.content,
-                is_correct=option_in.is_correct
-            )
-            db.add(db_option)
-        
-        db.commit()
-    
-    return db_question
+    return QuizService.create_question(db, bank_id, question_in, current_user)
 
 
 @router.get("/banks/{bank_id}/questions", response_model=List[QuestionSchema])
@@ -256,7 +149,6 @@ def list_questions(
     bank_id: int,
     skip: int = 0,
     limit: int = 100,
-    difficulty: Optional[DifficultyEnum] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -268,31 +160,10 @@ def list_questions(
     - **bank_id**: 题库ID
     - **skip**: 跳过的记录数（分页用）
     - **limit**: 返回的最大记录数（分页用）
-    - **difficulty**: 按难度筛选（可选）
     
     返回问题列表
     """
-    # 检查题库是否存在且属于当前用户
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    # 查询问题
-    query = db.query(Question).filter(Question.bank_id == bank_id)
-    
-    if difficulty:
-        query = query.filter(Question.difficulty == difficulty)
-    
-    questions = query.offset(skip).limit(limit).all()
-    
-    return questions
+    return QuizService.list_questions(db, bank_id, current_user, skip, limit)
 
 
 @router.get("/questions/{question_id}", response_model=QuestionSchema)
@@ -308,23 +179,9 @@ def get_question(
     
     - **question_id**: 问题ID
     
-    返回问题详情，包括选项和统计信息
+    返回问题详情
     """
-    # 查询问题，并确保题库属于当前用户
-    question = db.query(Question).join(
-        QuestionBank, Question.bank_id == QuestionBank.id
-    ).filter(
-        Question.id == question_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="问题不存在或无权访问"
-        )
-    
-    return question
+    return QuizService.get_question(db, question_id, current_user)
 
 
 @router.put("/questions/{question_id}", response_model=QuestionSchema)
@@ -347,38 +204,7 @@ def update_question(
     
     返回更新后的问题信息
     """
-    # 查询问题，并确保题库属于当前用户
-    question = db.query(Question).join(
-        QuestionBank, Question.bank_id == QuestionBank.id
-    ).filter(
-        Question.id == question_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="问题不存在或无权访问"
-        )
-    
-    # 更新问题信息
-    if question_in.prompt is not None:
-        question.prompt = question_in.prompt
-    
-    if question_in.answer is not None:
-        question.answer = question_in.answer
-    
-    if question_in.explanation is not None:
-        question.explanation = question_in.explanation
-    
-    if question_in.difficulty is not None:
-        question.difficulty = question_in.difficulty
-    
-    db.add(question)
-    db.commit()
-    db.refresh(question)
-    
-    return question
+    return QuizService.update_question(db, question_id, question_in, current_user)
 
 
 @router.delete("/questions/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -396,24 +222,7 @@ def delete_question(
     
     无返回内容
     """
-    # 查询问题，并确保题库属于当前用户
-    question = db.query(Question).join(
-        QuestionBank, Question.bank_id == QuestionBank.id
-    ).filter(
-        Question.id == question_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="问题不存在或无权访问"
-        )
-    
-    # 删除问题
-    db.delete(question)
-    db.commit()
-    
+    QuizService.delete_question(db, question_id, current_user)
     return None
 
 
@@ -438,200 +247,4 @@ def create_quiz(
     
     返回创建的测验信息
     """
-    # 检查题库是否存在且属于当前用户
-    bank = db.query(QuestionBank).filter(
-        QuestionBank.id == quiz_in.bank_id,
-        QuestionBank.user_id == current_user.id
-    ).first()
-    
-    if not bank:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="题库不存在或无权访问"
-        )
-    
-    # 创建测验
-    db_quiz = Quiz(
-        user_id=current_user.id,
-        bank_id=quiz_in.bank_id,
-        name=quiz_in.name,
-        description=quiz_in.description,
-        time_limit=quiz_in.time_limit,
-        question_count=quiz_in.question_count,
-        start_time=datetime.now()
-    )
-    db.add(db_quiz)
-    db.commit()
-    db.refresh(db_quiz)
-    
-    # 如果指定了问题数量，随机选择问题
-    if quiz_in.question_count:
-        # 获取题库中的问题
-        questions = db.query(Question).filter(
-            Question.bank_id == quiz_in.bank_id
-        ).order_by(
-            # 随机排序
-            db.func.random()
-        ).limit(quiz_in.question_count).all()
-        
-        # 添加问题到测验
-        for i, question in enumerate(questions):
-            db_quiz_question = QuizQuestion(
-                quiz_id=db_quiz.id,
-                question_id=question.id,
-                order=i + 1
-            )
-            db.add(db_quiz_question)
-        
-        db.commit()
-    
-    return db_quiz
-
-
-@router.get("/quizzes", response_model=List[QuizSchema])
-def list_quizzes(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    获取测验列表
-    
-    获取当前用户创建的所有测验
-    
-    - **skip**: 跳过的记录数（分页用）
-    - **limit**: 返回的最大记录数（分页用）
-    
-    返回测验列表
-    """
-    quizzes = db.query(Quiz).filter(
-        Quiz.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
-    
-    return quizzes
-
-
-@router.get("/quizzes/{quiz_id}", response_model=QuizSchema)
-def get_quiz(
-    quiz_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    获取测验详情
-    
-    获取指定ID的测验详情
-    
-    - **quiz_id**: 测验ID
-    
-    返回测验详情，包括测验中的问题
-    """
-    quiz = db.query(Quiz).filter(
-        Quiz.id == quiz_id,
-        Quiz.user_id == current_user.id
-    ).first()
-    
-    if not quiz:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="测验不存在或无权访问"
-        )
-    
-    return quiz
-
-
-@router.post("/quizzes/{quiz_id}/submit", status_code=status.HTTP_200_OK)
-def submit_quiz(
-    quiz_id: int,
-    submission_in: QuizSubmissionCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    提交测验答案
-    
-    提交指定测验的答案
-    
-    - **quiz_id**: 测验ID
-    - **answers**: 答案字典，键为问题ID，值为用户答案
-    
-    返回评分结果
-    """
-    # 检查测验是否存在且属于当前用户
-    quiz = db.query(Quiz).filter(
-        Quiz.id == quiz_id,
-        Quiz.user_id == current_user.id
-    ).first()
-    
-    if not quiz:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="测验不存在或无权访问"
-        )
-    
-    # 获取测验中的问题
-    quiz_questions = db.query(QuizQuestion).filter(
-        QuizQuestion.quiz_id == quiz_id
-    ).all()
-    
-    if not quiz_questions:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="测验中没有问题"
-        )
-    
-    # 计算得分
-    total_questions = len(quiz_questions)
-    correct_answers = 0
-    
-    for quiz_question in quiz_questions:
-        question_id = quiz_question.question_id
-        user_answer = submission_in.answers.get(str(question_id))
-        
-        if user_answer is None:
-            continue
-        
-        # 获取问题
-        question = db.query(Question).filter(Question.id == question_id).first()
-        
-        if not question:
-            continue
-        
-        # 检查答案是否正确
-        is_correct = user_answer.lower() == question.answer.lower()
-        
-        if is_correct:
-            correct_answers += 1
-        
-        # 创建提交记录
-        db_submission = QuizSubmission(
-            quiz_id=quiz_id,
-            question_id=question_id,
-            user_answer=user_answer,
-            is_correct=is_correct
-        )
-        db.add(db_submission)
-        
-        # 更新问题统计
-        question_stat = db.query(QuestionStat).filter(
-            QuestionStat.question_id == question_id
-        ).first()
-        
-        if question_stat:
-            question_stat.total_attempts += 1
-            if is_correct:
-                question_stat.correct_attempts += 1
-            db.add(question_stat)
-    
-    db.commit()
-    
-    # 计算得分百分比
-    score_percentage = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
-    
-    return {
-        "quiz_id": quiz_id,
-        "total_questions": total_questions,
-        "correct_answers": correct_answers,
-        "score_percentage": score_percentage
-    }
+    return QuizService.create_quiz(db, quiz_in, current_user)
