@@ -5,9 +5,10 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 
 from app.db.base import get_db
-from app.schemas.user import Token, UserCreate, UserResponse
+from app.schemas.auth import Token
+from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
-from app.core.config import settings
+from app.config import settings
 
 router = APIRouter()
 

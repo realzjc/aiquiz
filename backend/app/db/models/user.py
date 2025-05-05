@@ -1,25 +1,30 @@
 from sqlalchemy import Boolean, Column, String, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from ..base import Base
+from app.db.base import Base
 
+# app/db/models/user.py (部分修改)
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
+from datetime import datetime
 
 class User(Base):
+    """用户模型"""
     __tablename__ = "users"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships
-    profile = relationship("UserProfile", back_populates="user", uselist=False)
-    oauth_accounts = relationship("OAuthAccount", back_populates="user")
-    question_banks = relationship("QuestionBank", back_populates="user")
-    quizzes = relationship("Quiz", back_populates="user")
-    quiz_submissions = relationship("QuizSubmission", back_populates="user")
-    documents = relationship("Document", back_populates="user")
+    is_superuser = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关系
+    files = relationship("File", back_populates="user", cascade="all, delete-orphan")  # 修改为files
+    banks = relationship("QuestionBank", back_populates="user", cascade="all, delete-orphan")
+    profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 
 class UserProfile(Base):

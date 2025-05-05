@@ -1,4 +1,3 @@
-import data from "@/data/data.json"
 import { DataTable } from "@/components/common/data-table"
 import { ChartAreaInteractive } from "@/components/common/chart-area-interactive"
 import { useHeader } from "@/contexts/HeaderContext"
@@ -17,9 +16,9 @@ export default function Home({ children }: { children?: React.ReactNode }) {
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                     {/* <SectionCards /> */}
                     <div className="px-4 lg:px-6">
-                        <ChartAreaInteractive />
+                        {/* <ChartAreaInteractive /> */}
                     </div>
-                    <DataTable data={data} />
+                    {/* <DataTable data={data} /> */}
                 </div>
             </div>
         </div>

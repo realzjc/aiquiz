@@ -1,15 +1,22 @@
 # app/services/auth_service.py
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
+from typing import Optional
 
-from app.core.config import settings
+from app.config import settings
 from app.db.models.user import User
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate
+from app.db.base import get_db
 
+# 密码哈希上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# OAuth2 密码Bearer流程
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
 class AuthService:
     @staticmethod
@@ -24,7 +31,7 @@ class AuthService:
             )
         
         # 创建新用户
-        hashed_password = pwd_context.hash(user_in.password)
+        hashed_password = AuthService.get_password_hash(user_in.password)
         db_user = User(
             email=user_in.email,
             hashed_password=hashed_password,
@@ -42,7 +49,7 @@ class AuthService:
         user = db.query(User).filter(User.email == email).first()
         if not user:
             return False
-        if not pwd_context.verify(password, user.hashed_password):
+        if not AuthService.verify_password(password, user.hashed_password):
             return False
         return user
     
@@ -57,3 +64,50 @@ class AuthService:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
+    
+    @staticmethod
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """验证密码"""
+        return pwd_context.verify(plain_password, hashed_password)
+
+    @staticmethod
+    def get_password_hash(password: str) -> str:
+        """获取密码哈希"""
+        return pwd_context.hash(password)
+    
+    @staticmethod
+    def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        """获取当前用户"""
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无效的认证凭据",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+        try:
+            # 解码JWT
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
+            email: str = payload.get("sub")
+            if email is None:
+                raise credentials_exception
+        except JWTError:
+            raise credentials_exception
+        
+        # 查询用户
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise credentials_exception
+        
+        return user
+    
+    @staticmethod
+    def get_current_active_user(current_user: User = Depends(get_current_user)):
+        """获取当前活跃用户"""
+        if not current_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="用户已被禁用"
+            )
+        return current_user

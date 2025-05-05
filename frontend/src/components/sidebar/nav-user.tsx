@@ -30,7 +30,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
-import { SettingsDialog } from "../settings/settings-dialog"
+import { SettingsDialog } from "../settings/SettingsDialog"
 
 
 import { Copy } from "lucide-react"

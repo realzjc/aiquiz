@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_active_user
+from app.services.auth_service import AuthService
 from app.db.base import get_db
 from app.db.models.user import User
 from app.schemas.user import User as UserSchema, UserUpdate
@@ -11,7 +11,7 @@ from app.services.user_service import UserService
 router = APIRouter()
 
 @router.get("/me", response_model=UserSchema)
-def read_users_me(current_user: User = Depends(get_current_active_user)):
+def read_users_me(current_user: User = Depends(AuthService.get_current_active_user)):
     """
     获取当前用户信息
     
@@ -24,7 +24,7 @@ def read_users_me(current_user: User = Depends(get_current_active_user)):
 def update_user_me(
     user_in: UserUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     更新当前用户信息

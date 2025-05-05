@@ -1,14 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface HeaderContextType {
-    title: string;
-    setTitle: (title: string) => void;
-}
+// src/contexts/HeaderContext.tsx
+import React, { createContext, useContext, useState } from 'react';
+import { HeaderContextType } from '@/types/header';
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 
-export function HeaderProvider({ children }: { children: ReactNode }) {
-    const [title, setTitle] = useState<string>('Documents');
+export function HeaderProvider({ children }: { children: React.ReactNode }) {
+    const [title, setTitle] = useState('Dashboard');
 
     return (
         <HeaderContext.Provider value={{ title, setTitle }}>
@@ -20,7 +17,7 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
 export function useHeader() {
     const context = useContext(HeaderContext);
     if (context === undefined) {
-        throw new Error('useHeader 必须在 HeaderProvider 内部使用');
+        throw new Error('useHeader must be used within a HeaderProvider');
     }
     return context;
-} 
+}

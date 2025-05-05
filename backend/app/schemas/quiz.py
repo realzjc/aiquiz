@@ -110,7 +110,7 @@ class QuestionInDB(QuestionBase):
     stats: Optional[QuestionStatInDB] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode = True
 
 
 class Question(QuestionBase):

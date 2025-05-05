@@ -1,8 +1,8 @@
 // src/layouts/Layout.tsx
 import { Outlet } from "react-router-dom"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/sidebar/app-sidebar"
-import { SiteHeader } from "@/components/common/site-header"
+import { AppSidebar } from "@/components/sidebar/AppSidebar"
+import { SiteHeader } from "@/components/siteheader/SiteHeader"
 import { HeaderProvider } from "@/contexts/HeaderContext"
 
 export default function Layout() {

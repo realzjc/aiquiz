@@ -40,7 +40,8 @@ class UserInDB(UserBase):
     created_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode = True
+
 
 
 class User(UserBase):
@@ -75,4 +76,4 @@ class UserProfileInDB(UserProfileBase):
     last_login_at: Optional[datetime] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode = True

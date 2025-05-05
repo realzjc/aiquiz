@@ -3,41 +3,42 @@ from typing import Optional
 from datetime import datetime
 
 
-class DocumentBase(BaseModel):
-    """文档基础信息"""
+class FileBase(BaseModel):
+    """文件基础信息"""
     filename: str
-    file_path: str
+    filepath: str
+    filetype: Optional[str] = None
+    filesize: Optional[int] = None
 
 
-class DocumentCreate(DocumentBase):
-    """创建文档请求模型"""
-    user_id: int
+class FileCreate(FileBase):
+    """文件创建模型"""
+    pass
 
 
-class DocumentUpdate(BaseModel):
-    """更新文档请求模型"""
+class FileUpdate(BaseModel):
+    """文件更新模型"""
     filename: Optional[str] = None
-    file_path: Optional[str] = None
     parsed_text: Optional[str] = None
 
 
-class DocumentInDB(DocumentBase):
-    """数据库中的文档模型"""
+class FileInDB(FileBase):
+    """数据库中的文件模型"""
     id: int
     user_id: int
     parsed_text: Optional[str] = None
     created_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode = True
 
 
-class Document(DocumentBase):
-    """文档响应模型"""
+class File(FileBase):
+    """文件响应模型"""
     id: int
     user_id: int
     parsed_text: Optional[str] = None
     created_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode = True

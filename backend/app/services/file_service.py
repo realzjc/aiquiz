@@ -7,19 +7,19 @@ from datetime import datetime
 
 from app.db.models.user import User
 from app.db.models.file import File
-from app.core.config import settings
+from app.config import Settings
 
 class FileService:
     @staticmethod
     async def upload_file(db: Session, file: UploadFile, current_user: User):
         """上传文件"""
         # 创建上传目录（如果不存在）
-        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+        os.makedirs(Settings.UPLOAD_DIRECTORY, exist_ok=True)
         
         # 生成唯一文件名
         file_ext = os.path.splitext(file.filename)[1]
         unique_filename = f"{uuid.uuid4()}{file_ext}"
-        file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
+        file_path = os.path.join(Settings.UPLOAD_DIRECTORY, unique_filename)
         
         # 保存文件
         try:
@@ -87,7 +87,7 @@ class FileService:
         
         # 删除物理文件
         try:
-            file_path = os.path.join(settings.UPLOAD_DIR, file.filepath)
+            file_path = os.path.join(Settings.UPLOAD_DIRECTORY, file.filepath)
             if os.path.exists(file_path):
                 os.remove(file_path)
         except Exception as e:
@@ -97,3 +97,29 @@ class FileService:
         # 删除数据库记录
         db.delete(file)
         db.commit()
+        
+        return {"success": True}
+    
+    @staticmethod
+    def update_file(db: Session, file_id: int, file_update, current_user: User):
+        """更新文件信息"""
+        file = db.query(File).filter(
+            File.id == file_id,
+            File.user_id == current_user.id
+        ).first()
+        
+        if not file:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="文件不存在或无权访问"
+            )
+        
+        # 更新文件信息
+        update_data = file_update.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(file, key, value)
+        
+        db.commit()
+        db.refresh(file)
+        
+        return file

@@ -1,28 +1,10 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '@/lib/api';
+import { User, AuthContextType } from '@/types/auth';
+import { getCurrentUser } from '@/features/auth/services/authService';
 
-// 定义用户类型
-interface User {
-    id: string;
-    email: string;
-    name?: string;
-    // 其他用户属性...
-}
-
-// 定义认证上下文类型
-interface AuthContextType {
-    user: User | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    login: (token: string, userData: User) => void;
-    logout: () => void;
-    refreshUser: () => Promise<void>;
-}
-
-// 创建上下文
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 创建提供者组件
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -35,8 +17,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (token) {
                 try {
                     // 验证 token 并获取用户信息
-                    const response = await api.get('/auth/me');
-                    setUser(response.data);
+                    const userData = await getCurrentUser();
+                    setUser(userData);
                     setIsAuthenticated(true);
                 } catch (error) {
                     // Token 无效，清除存储
@@ -66,12 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 刷新用户信息
     const refreshUser = async () => {
         try {
-            const response = await api.get('/auth/me');
-            setUser(response.data);
-            return response.data;
+            const userData = await getCurrentUser();
+            setUser(userData);
+            return userData;
         } catch (error) {
             console.error('Failed to refresh user data', error);
-            throw error;
+            return null;
         }
     };
 
@@ -91,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-// 创建自定义钩子
+// 自定义钩子
 export function useAuth() {
     const context = useContext(AuthContext);
     if (context === undefined) {

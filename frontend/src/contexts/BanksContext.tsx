@@ -1,33 +1,23 @@
 // src/contexts/BanksContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from "react"
-import { LucideIcon } from "lucide-react"
+import React, { createContext, useContext, useState } from 'react';
+import { Bank, BanksContextType } from '@/types/bank';
 
-export interface Bank {
-    id: string
-    name: string
-    url: string
-    icon: LucideIcon
-}
+const BanksContext = createContext<BanksContextType | undefined>(undefined);
 
-interface BanksContextValue {
-    banks: Bank[]
-    addBank: (bank: Bank) => void
-}
+export function BanksProvider({ children }: { children: React.ReactNode }) {
+    const [banks, setBanks] = useState<Bank[]>([]);
 
-const BanksContext = createContext<BanksContextValue>({
-    banks: [],
-    addBank: () => { },
-})
-
-export const BanksProvider = ({ children }: { children: ReactNode }) => {
-    const [banks, setBanks] = useState<Bank[]>([])
-    const addBank = (bank: Bank) => setBanks((prev) => [...prev, bank])
-    
     return (
-        <BanksContext.Provider value={{ banks, addBank }}>
+        <BanksContext.Provider value={{ banks, setBanks }}>
             {children}
         </BanksContext.Provider>
-    )
+    );
 }
 
-export const useBanks = () => useContext(BanksContext)
+export function useBanksContext() {
+    const context = useContext(BanksContext);
+    if (context === undefined) {
+        throw new Error('useBanksContext must be used within a BanksProvider');
+    }
+    return context;
+}

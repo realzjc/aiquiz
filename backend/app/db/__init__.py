@@ -17,7 +17,7 @@ from .base import get_db
 models = [
     models.user.User,
     models.user.UserProfile,
-    models.file.Document,
+    models.file.File,
     models.quiz.QuestionBank,
     models.quiz.Question,
     models.quiz.QuestionOption,

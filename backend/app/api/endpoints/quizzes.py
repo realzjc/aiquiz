@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Path, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.core.security import get_current_active_user
+from app.services.auth_service import AuthService
 from app.db.base import get_db
 from app.db.models.user import User
 from app.services.quiz_service import QuizService
@@ -25,7 +25,7 @@ router = APIRouter()
 def create_question_bank(
     bank_in: QuestionBankCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     创建题库
@@ -45,7 +45,7 @@ def list_question_banks(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     获取题库列表
@@ -64,7 +64,7 @@ def list_question_banks(
 def get_question_bank(
     bank_id: int = Path(..., title="题库ID", description="要获取的题库的ID"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     获取题库详情
@@ -83,7 +83,7 @@ def update_question_bank(
     bank_id: int,
     bank_in: QuestionBankUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     更新题库
@@ -103,7 +103,7 @@ def update_question_bank(
 def delete_question_bank(
     bank_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     删除题库
@@ -125,7 +125,7 @@ def create_question(
     bank_id: int,
     question_in: QuestionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     创建问题
@@ -150,7 +150,7 @@ def list_questions(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     获取问题列表
@@ -170,7 +170,7 @@ def list_questions(
 def get_question(
     question_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     获取问题详情
@@ -189,7 +189,7 @@ def update_question(
     question_id: int,
     question_in: QuestionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     更新问题
@@ -211,7 +211,7 @@ def update_question(
 def delete_question(
     question_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     删除问题
@@ -232,7 +232,7 @@ def delete_question(
 def create_quiz(
     quiz_in: QuizCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     创建测验
