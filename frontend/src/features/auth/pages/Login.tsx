@@ -1,7 +1,6 @@
 
 /* src/pages/Login.tsx */
-import { GalleryVerticalEnd } from "lucide-react"
-import { LoginForm } from "@/components/auth/login-form"
+import { LoginForm } from "@/features/auth/components/LoginForm"
 
 export default function Login() {
     return (

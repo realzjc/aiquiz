@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthContextType } from '@/types/auth';
 import { getCurrentUser } from '@/features/auth/services/authService';
+import api from '@/lib/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setIsAuthenticated(true);
                 } catch (error) {
                     // Token 无效，清除存储
+                    console.error('Token validation failed:', error);
                     localStorage.removeItem('token');
                 }
             }
@@ -32,10 +34,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     // 登录函数
-    const login = (token: string, userData: User) => {
+    const login = async (token: string, basicUserData: User) => {
         localStorage.setItem('token', token);
-        setUser(userData);
         setIsAuthenticated(true);
+
+        // 设置临时用户数据
+        setUser(basicUserData);
+
+        // 获取完整的用户信息
+        try {
+            const fullUserData = await getCurrentUser();
+            setUser(fullUserData);
+        } catch (error) {
+            console.error('Failed to fetch complete user data:', error);
+            // 保留基本用户数据，不影响登录流程
+        }
     };
 
     // 登出函数

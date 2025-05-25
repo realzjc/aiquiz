@@ -1,73 +1,47 @@
 # app/api/endpoints/files.py
-from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Query
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.db.base import get_db
-from app.schemas.file import File as FileSchema
-from app.services.file_service import FileService
+from app.db.models.user import User
 from app.services.auth_service import AuthService
+from app.services.file_service import FileService
+from app.schemas.file import FileResponse
 
 router = APIRouter()
 
-@router.post("/", response_model=FileSchema)
+@router.post("/upload/{bank_id}", response_model=FileResponse)
 async def upload_file(
-    file: UploadFile = FastAPIFile(...),
+    bank_id: int,
+    file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user = Depends(AuthService.get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
-    上传文件
-    
-    - **file**: 要上传的文件
-    
-    返回上传的文件信息
+    上传文件到指定题库
     """
-    return await FileService.upload_file(db, file, current_user)
+    return await FileService.upload_file(db, file, bank_id, current_user)
 
-@router.get("/", response_model=List[FileSchema])
-def get_user_files(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
+@router.get("/bank/{bank_id}", response_model=List[FileResponse])
+async def get_files_by_bank(
+    bank_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(AuthService.get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
-    获取当前用户的文件列表
-    
-    - **skip**: 跳过的记录数
-    - **limit**: 返回的最大记录数
-    
-    返回文件列表
+    获取指定题库的所有文件
     """
-    return FileService.get_user_files(db, current_user, skip, limit)
+    return FileService.get_files_by_bank(db, bank_id, current_user)
 
-@router.get("/{file_id}", response_model=FileSchema)
-def get_file(
-    file_id: int,
+@router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_file(
+    file_id: str,
     db: Session = Depends(get_db),
-    current_user = Depends(AuthService.get_current_active_user)
-):
-    """
-    获取文件详情
-    
-    - **file_id**: 文件ID
-    
-    返回文件详情
-    """
-    return FileService.get_file(db, file_id, current_user)
-
-@router.delete("/{file_id}")
-def delete_file(
-    file_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(AuthService.get_current_active_user)
+    current_user: User = Depends(AuthService.get_current_active_user)
 ):
     """
     删除文件
-    
-    - **file_id**: 文件ID
-    
-    返回删除结果
     """
-    return FileService.delete_file(db, file_id, current_user)
+    FileService.delete_file(db, file_id, current_user)
+    return None

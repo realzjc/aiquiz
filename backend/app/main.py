@@ -5,14 +5,13 @@ from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.db.base import engine
-from app.db import models
 from app.api import api_router
 
-# 创建数据库表
-for model in models:  # 直接使用models列表，不要访问__all__属性
-    model.__table__.create(bind=engine, checkfirst=True)
-    
+from app.db.models import Base  # 来自 models/__init__.py 中 re-export
+from app.db.base import engine
+
+Base.metadata.create_all(bind=engine)
+
 # 确保上传目录存在
 os.makedirs(settings.UPLOAD_DIRECTORY, exist_ok=True)
 

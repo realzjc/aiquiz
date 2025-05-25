@@ -1,25 +1,25 @@
 // src/features/auth/components/LoginForm.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useAuth } from "../hooks/useAuth";
-import { loginUser } from "../services/authService";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { loginUser } from "@/features/auth/services/authService";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
     const [email, setEmail] = useState("");
+    const { login, isAuthenticated } = useAuth();
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, isAuthenticated } = useAuth();
 
     // 如果用户已登录，重定向到仪表盘
     useEffect(() => {
@@ -32,6 +32,8 @@ export function LoginForm({
         e.preventDefault();
         setIsLoading(true);
 
+        console.log("Login form submitted");
+
         try {
             // 使用修改后的loginUser函数，它会使用FormData格式
             const response = await loginUser(email, password);
@@ -41,19 +43,19 @@ export function LoginForm({
                 id: response.user_id,
                 email: response.email,
             });
-
-            toast.success("登录成功");
+            console.log("Login successful");
+            toast.success("Login successful");
             navigate("/dashboard");
         } catch (err: any) {
             const detail = err?.response?.data?.detail;
-            let msg = "登录失败，请重试";
+            let msg = "Login failed. Please try again.";
 
             if (Array.isArray(detail)) {
-                msg = detail.map((d: any) => d.msg).join("；");
+                msg = detail.map((d: any) => d.msg).join("; ");
             } else if (typeof detail === "string") {
                 msg = detail;
             }
-
+            console.error("Login error:", msg);
             toast.error(msg);
         } finally {
             setIsLoading(false);
@@ -65,7 +67,7 @@ export function LoginForm({
             <Card className="bg-gray-950 border-gray-800">
                 <CardHeader>
                     <CardTitle className="text-xl text-center text-white">
-                        登录您的账户
+                        Sign in to your account
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -74,7 +76,7 @@ export function LoginForm({
                             {/* 邮箱 */}
                             <div className="grid gap-2">
                                 <Label htmlFor="email" className="text-gray-400">
-                                    邮箱
+                                    Email
                                 </Label>
                                 <Input
                                     id="email"
@@ -91,13 +93,13 @@ export function LoginForm({
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password" className="text-gray-400">
-                                        密码
+                                        Password
                                     </Label>
                                     <Link
                                         to="/forgot-password"
                                         className="text-sm text-blue-500 hover:text-blue-400"
                                     >
-                                        忘记密码?
+                                        Forgot password?
                                     </Link>
                                 </div>
                                 <Input
@@ -116,16 +118,16 @@ export function LoginForm({
                             disabled={isLoading}
                             className="w-full bg-blue-600 hover:bg-blue-500"
                         >
-                            {isLoading ? "登录中..." : "登录"}
+                            {isLoading ? "Logging in..." : "Login"}
                         </Button>
 
                         <div className="text-center text-sm text-gray-400">
-                            还没有账号?{" "}
+                            Don't have an account?{" "}
                             <Link
                                 to="/register"
                                 className="text-blue-500 hover:text-blue-400"
                             >
-                                注册
+                                Register
                             </Link>
                         </div>
                     </form>

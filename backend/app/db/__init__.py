@@ -17,14 +17,16 @@ from .base import get_db
 models = [
     models.user.User,
     models.user.UserProfile,
+    models.user.OAuthAccount,
     models.file.File,
     models.quiz.QuestionBank,
     models.quiz.Question,
     models.quiz.QuestionOption,
     models.quiz.QuestionStat,
+    models.quiz.QuestionBankShare,
     models.quiz.Quiz,
     models.quiz.QuizQuestion,
-    models.quiz.QuizSubmission
+    models.quiz.QuizSubmission,
 ]
 
 __all__ = ["base", "models", "get_db"]

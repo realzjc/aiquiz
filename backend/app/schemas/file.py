@@ -42,3 +42,13 @@ class File(FileBase):
     
     class Config:
         from_attributes = True  # 替换 orm_mode = True
+
+
+class FileResponse(BaseModel):
+    id: str
+    name: str
+    type: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True

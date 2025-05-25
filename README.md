@@ -20,6 +20,11 @@ npm run dev
 
 http://localhost:5173/
 
+## alembic change 
+
+docker compose exec backend alembic revision --autogenerate -m "xxx"
+docker compose exec backend alembic revision --autogenerate -m "add bank_id to files"
+
 ## docker 
 remove old dependencies and volume(database) and build new one
 ``` bash
@@ -29,6 +34,13 @@ docker compose up
 
 docker compose up --build --remove-orphans
 ```
+
+``` bash
+docker compose down --volumes --remove-orphans
+docker compose build --no-cache
+docker compose up
+```
+
 docker system prune -a --volumes 删除不需要的
 
-className="bg-white text-black shadow-lg border border-gray-200"
+className="bg-white text-black shadow-lg border border-gray-200

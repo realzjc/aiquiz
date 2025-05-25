@@ -5,7 +5,7 @@ import filePlusLogo from '@/assets/file-plus-2.svg'
 import oneDriveLogo from '@/assets/onedrive.svg'
 import googleDriveLogo from '@/assets/googledrive.svg'
 import { useHeader } from "@/contexts/HeaderContext"
-import { useBanks } from "@/contexts/BanksContext"                                  // ▶ MOD: import BanksContext
+import { useBanks } from "@/features/bank/hooks/useBanks"                                  // ▶ MOD: import BanksContext
 import { useEffect, useRef, useState, useLayoutEffect } from "react"
 import { useNavigate } from "react-router-dom"                                      // ▶ MOD: import navigation
 import { Button } from "@/components/ui/button"
@@ -125,13 +125,8 @@ export default function QuickCreate() {
             const json = await res.json()
             // ▶ MOD: expect { bankId, bankName }
             if (json.bankId && json.bankName) {
-                addBank({
-                    id: json.bankId,
-                    name: json.bankName,
-                    url: `/chat/${json.bankId}`,                                         // ▶ MOD: chat route
-                    icon: FileText,
-                })
-                navigate(`/chat/${json.bankId}`)                                       // ▶ MOD: navigate
+                addBank(json.bankId, json.bankName)
+                navigate(`/chat/${json.bankId}`)                                        // ▶ MOD: navigate
             }
         } catch (err) {
             console.error(err)

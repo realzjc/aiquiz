@@ -21,11 +21,15 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # 关系
-    files = relationship("File", back_populates="user", cascade="all, delete-orphan")  # 修改为files
-    banks = relationship("QuestionBank", back_populates="user", cascade="all, delete-orphan")
+    # 题库关系
+    question_banks = relationship("QuestionBank", back_populates="user", cascade="all, delete-orphan")
+    # 文件、个人档案、OAuth 帐号
+    files = relationship("File", back_populates="user", cascade="all, delete-orphan")
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
-
+    oauth_accounts = relationship("OAuthAccount", back_populates="user", cascade="all, delete-orphan")
+    # Quiz 与提交
+    quizzes = relationship("Quiz", back_populates="user", cascade="all, delete-orphan")
+    quiz_submissions = relationship("QuizSubmission", back_populates="user", cascade="all, delete-orphan")
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"

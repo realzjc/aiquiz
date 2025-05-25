@@ -1,6 +1,5 @@
 // src/pages/Register.tsx
-import { GalleryVerticalEnd } from "lucide-react"
-import { RegisterForm } from "@/components/auth/register-form"
+import { RegisterForm } from "@/features/auth/components/RegisterForm"
 
 export default function Register() {
     return (

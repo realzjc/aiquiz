@@ -1,6 +1,8 @@
 // src/features/bank/hooks/useBanks.ts
+// 基本的 
+// 业务逻辑层，类似 后端services层
 import { useEffect } from 'react';
-import { bankApi } from '../services/bankApi';
+import { bankApi } from '@/features/bank/api/bankApi';
 import { useBanksContext } from '@/contexts/BanksContext';
 import { Bank } from '@/types/bank';
 
@@ -24,6 +26,7 @@ export function useBanks() {
     async function addBank(name: string, description?: string): Promise<string> {
         const newBank = await bankApi.create(name, description);
         setBanks(prev => [...prev, newBank]);
+        console.log('newBank', newBank);
         return newBank.id;
     }
 
